@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podpvc
+spec:
+  containers:
+    - name: pod0
+      image: busybox
+      command: ["sleep", "3600"]
+      volumeMounts:
+        - mountPath: "/data"
+          name: mystorage
+  volumes:
+    - name: mystorage
+      persistentVolumeClaim:
+        claimName: dynamicpvc
