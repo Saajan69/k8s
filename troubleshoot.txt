@@ -1,0 +1,30 @@
+Troubleshoot Clusters and Nodes
+*check status first
+-kubectl get nodes:check node status
+-kubectl describe node "node-name"
+-kubectl describe pod "pod-name"
+*troubleshoot
+-sudo systemctl stop kubelet
+
+Troubleshoot Cluster Components
+-kubectl get pods -n kube-system:describe all k8s components
+-kubectl logs -n kube-system "pod-name"
+-journalctl -u kubelet:describe all kubelet logs-dont run on minikube go inside minikube to run (tool to view system log)
+
+Monitor Cluster and Application Resource Usage
+-kubectl top nodes(rely on metrics server)
+-kubectl top pods(give all cpu and memory usage)
+
+Manage and Evaluate Container Output Streams
+-kubectl logs "pod-name" -c "container-name"(shows stdout/stderr)
+-kubectl logs -f "pod-name"(view stream logs)
+kubectl logs --previous "pod-name"(troubleshoot crashed pod)
+
+Troubleshoot Services and Networking
+-kubectl get svc
+-kubectl describe svc "svc-name"
+-kubectl get endpoints(give ip and ports for services)
+-kubectl exec -it "pod-name" -- nslookup kubernetes(resolves to the ClusterIP of the API server and internal DNS name)
+-kubectl exec -it <pod> -- curl <service-name>:<port> (test port connectivity)
+-kubectl run netshoot --rm -it --image=nicolaka/netshoot -- bash (Uses the netshoot image [a debugging toolbox for networking])
+
