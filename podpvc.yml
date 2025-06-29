@@ -6,11 +6,21 @@ spec:
   containers:
     - name: pod0
       image: busybox
-      command: ["sleep", "3600"]
+      command: ["sh", "-c", "env; sleep 3600"]
       volumeMounts:
         - mountPath: "/data"
           name: mystorage
+      envFrom:
+        - configMapRef:
+            name: configmap
+      env:
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: secretapp
+              key: DB_PASS
   volumes:
     - name: mystorage
       persistentVolumeClaim:
         claimName: dynamicpvc
+

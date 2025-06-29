@@ -1,0 +1,149 @@
+kubectl set image deployment/nginx nginx=nginx:1.22-update the deployment
+kubectl rollout status deployment/nginx-waits and shows progress as the new pods come up and old ones are terminated
+kubectl rollout undo deployment/nginx-revert back if issue does not resolve
+
+ReplicaSet	Ensure N pods run — rarely used directly
+Deployment	For apps needing updates, scaling, rollback
+DaemonSet	For per-node pods (monitoring, logging, networking)
+StatefulSet	For apps needing stable identity, ordered pods, unique storage (DBs, queues)
+
+ConfigMap-loads all key-value pairs as environment variables.
+kubectl create configmap config --from-literal=APP_ENV=production(configmap creartion command)
+kubectl get configmap config -o yaml(check)
+
+Secret
+kubectl create secret generic secretapp --from-literal=DB_PASS=pass123
+kubectl get secret secretapp -o yaml(64 bit encodeed)
+
+
+ConfigMap	Store non-sensitive config (env, URLs, etc)	envFrom, env, volumes
+Secret	        Store sensitive data (passwords, tokens)	env, volumes
+
+Mount ConfigMap as Volume-
+volumeMounts:
+        - name: config-vol
+          mountPath: /config
+  volumes:
+    - name: config-vol
+      configMap:
+        name: configmap
+
+Mount Secret as Volume-
+volumeMounts:
+        - name: secret-vol
+          mountPath: /secrets
+          readOnly: true
+  volumes:
+    - name: secret-vol
+      secret:
+        secretName: secretapp
+
+HPA automatically scales the number of pods in a Deployment, ReplicaSet, or StatefulSet based on resource usage,
+like CPU or memory.
+-You have enough pods to handle load
+-You don’t waste resources during low load
+
+minikube addons enable metrics-server-The metrics-server collects resource usage (CPU, memory) from nodes & pods
+kubectl autoscale deployment "name" --cpu-percent=50 --min=1 --max=5
+
+Primitives for Self-Healing Deployments
+(Kubernetes provides built-in mechanisms to keep your apps healthy without manual intervention)
+-ReplicaSets: Auto-Respawn Pods(ensures that the desired number of pod replicas are always running)
+-Liveness Probe(check pod is alive or not if fails then it kill that pod and replicaset will create replacement pod )
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 5
+        periodSeconds: 10
+
+-Readiness Probe(check traffic if fails remove the pod from Service endpoints)
+   readinessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 2
+        periodSeconds: 5
+
+Resource Requests and Limits
+resources:
+  requests:
+    cpu: "100m"        # 0.1 CPU core minimum guaranteed
+    memory: "128Mi"    # 128 MiB RAM minimum guaranteed
+  limits:
+    cpu: "500m"        # 0.5 CPU core max allowed
+    memory: "256Mi"    # 256 MiB RAM max allowed
+
+Node Affinity-[Control which nodes your pod can be scheduled on based on node labels]
+-Schedule this pod only on nodes that meet certain conditions (node labels)
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - minikube
+
+Taints and Tolerations
+kubectl taint nodes minikube dedicated=gpu:NoSchedule
+        -no pod will be scheduled on minikube unless it tolerates dedicated=gpu:NoSchedule
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "gpu"
+    effect: "NoSchedule"
+
+Taints Prevent pods from being scheduled on nodes unless they tolerate the taint
+Tolerations Allow certain pods to schedule on tainted nodes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
