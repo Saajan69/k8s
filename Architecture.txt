@@ -1,0 +1,88 @@
+kubectl auth can-i list pods --as=system:serviceaccount:saumya:demo -n saumya(test auth)
+ -rolebinding using serive account
+kubectl auth can-i delete pods --as=system:serviceaccount:saumya:demo -n saumya
+
+Prepare Underlying Infrastructure
+| Step                 | Purpose                                               |
+| -------------------- | ----------------------------------------------------- |
+| `swapoff` + `fstab`  | Disable swap → kubelet requires it                    |
+| `hostnamectl`        | Set node identity (important for kubeadm, kubelet)    |
+| `/etc/hosts`         | Allow nodes to resolve each other without DNS         |
+| `containerd` install | Provide runtime for containers                        |
+| config + enable      | Ensure containerd runs correctly and survives reboots |
+
+Create and Manage Kubernetes Cluster Using kubeadm
+| Step             | Action                                  | Why?                                     |
+| ---------------- | --------------------------------------- | ---------------------------------------- |
+| Install tools    | Install `kubeadm`, `kubelet`, `kubectl` | Needed for cluster creation + management |
+| `kubeadm init`   | Bootstrap master                        | Sets up control plane                    |
+| `kubectl config` | Setup CLI access                        | Allows managing cluster as normal user   |
+| Worker join      | Add nodes                               | Scales cluster                           |
+
+Manage Cluster Lifecycle
+-[Drain a node]kubectl drain node-name --ignore-daemonsets --delete-local-data
+(Evicts pods,Skips DaemonSet-managed pods,Deletes pods with local data)
+-[Cordon a node]kubectl cordon node-name
+(Stops new pods from being scheduled onto the node)
+-[Uncordon a node]kubectl uncordon node-name
+-sudo kubeadm reset(cleanup a node)
+-sudo rm -rf /etc/cni/net.d(cleans up CNI)
+
+Implement and Configure Highly-Available Control Plane
+-HA control plane
+ (Prevents single points of failure.Your cluster stays functional even if one master node fails)
+ You run multiple control plane nodes (all run API server, controller manager, scheduler, etcd).
+-A load balancer (LB) fronts these control planes, providing a single stable endpoint to the clients (kubectl, kubelet).
+ External Load Balancer
+ Could be HAProxy, nginx, cloud LB, etc.It listens on port 6443 and forwards requests to all healthy control plane nodes.
+
+Use Helm and Kustomize to Install Cluster Components
+Helm-A package manager for Kubernetes (like apt or yum for Linux).-Simplifies installing and managing complex apps as charts.
+Kustomize-A native Kubernetes manifest transformer.-Allows you to layer, patch, and reuse YAML without templating.
+
+Understand Extension Interfaces (CNI, CSI, CRI)
+-CNI provides a standard interface for configuring network connectivity for containers.
+ Manages networking (e.g., Flannel, Calico)
+-CRI defines how Kubernetes talks to the container runtime on each node.
+ start/stop container, pull images, containter status (e.g., containerd)
+-CSI standardizes how Kubernetes talks to external storage systems.
+ Allows dynamic provisioning of volumes, attaching/detaching disks (EBS, Ceph)
+
+CRDs & Operators in Kubernetes
+-lets you create new resource types (like built-in types: Pod, Service).
+
+CRD-The new API type (e.g. CronTab, EtcdCluster)
+Operator-The automation logic → watches CRs, creates/manages resources
+CR-The actual resource you define (e.g. your etcd cluster config)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

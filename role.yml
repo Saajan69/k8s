@@ -1,0 +1,9 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: saumya          # This Role is *scoped* to the saumya namespace
+  name: podreader         # Name of the Role
+rules:
+- apiGroups: [""]          # "" = core API group (pods are in core group)
+  resources: ["pods"]      # We are granting permissions on Pods
+  verbs: ["get", "list", "watch"]   # Allowed actions: view pod info, list pods, watch for changes
